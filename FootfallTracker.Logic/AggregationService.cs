@@ -1,4 +1,7 @@
-﻿using FootfallTracker.Models;
+﻿using CsvHelper;
+using CsvHelper.Configuration;
+using FootfallTracker.Models;
+using System.Globalization;
 
 namespace FootfallTracker.Logic
 {
@@ -9,7 +12,7 @@ namespace FootfallTracker.Logic
             var footfallData = await ReadCsvData(filePath);
 
             var filteredData = footfallData
-                .Where(entry => entry.Timestamp >= startDate && entry.Timestamp <= endDate)
+                .Where(entry => entry.TimeStamp >= startDate && entry.TimeStamp <= endDate)
                 .ToList();
 
             IEnumerable<AggregatedData> aggregatedData = new List<AggregatedData>();
@@ -35,8 +38,8 @@ namespace FootfallTracker.Logic
             var hourlyAggregations = data
                 .GroupBy(entry => new
                 {
-                    entry.Timestamp.Date,
-                    entry.Timestamp.Hour
+                    entry.TimeStamp.Date,
+                    entry.TimeStamp.Hour
                 })
                 .Select(group => new AggregatedData
                 {
@@ -52,7 +55,7 @@ namespace FootfallTracker.Logic
         private IEnumerable<AggregatedData> AggregateDaily(List<FootfallRecord> data)
         {
             var dailyAggregations = data
-                .GroupBy(entry => entry.Timestamp.Date)
+                .GroupBy(entry => entry.TimeStamp.Date)
                 .Select(group => new AggregatedData
                 {
                     Date = group.Key,
@@ -66,7 +69,7 @@ namespace FootfallTracker.Logic
         private IEnumerable<AggregatedData> AggregateWeekly(List<FootfallRecord> data)
         {
             var weeklyAggregations = data
-                .GroupBy(entry => GetStartOfWeek(entry.Timestamp))
+                .GroupBy(entry => GetStartOfWeek(entry.TimeStamp))
                 .Select(group => new AggregatedData
                 {
                     Date = group.Key,
@@ -84,10 +87,20 @@ namespace FootfallTracker.Logic
             return date.Date.AddDays(-daysToSubtract);
         }
 
-        private async Task<IEnumerable<FootfallRecord>> ReadCsvData(string filePath)
+        public async Task<IEnumerable<FootfallRecord>> ReadCsvData(string filePath)
         {
-            var csvData = new List<FootfallRecord>();
-            return csvData;
+            using var reader = new StreamReader(filePath);
+            using var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture));
+
+            csv.Context.RegisterClassMap<FootfallRecordMap>();
+
+            var records = new List<FootfallRecord>();
+            await foreach (var record in csv.GetRecordsAsync<FootfallRecord>())
+            {
+                records.Add(record);
+            }
+
+            return records;
         }
     }
 }
