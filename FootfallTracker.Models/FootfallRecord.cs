@@ -1,11 +1,4 @@
-﻿using FootfallTracker.Logic;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace FootfallTracker.Models
+﻿namespace FootfallTracker.Models
 {
     public class FootfallRecord
     {

@@ -4,25 +4,49 @@ namespace FootfallTracker.Logic
 {
     public class AggregationService : IAggregationService
     {
-        public IEnumerable<HourlyAggregation> GetHourlyData(string filePath, DateTime startDate, DateTime endDate)
+        public async Task<IEnumerable<FootfallRecord>> GetAggregatedData(string timeframe, string filePath, DateTime startDate, DateTime endDate)
         {
-            var footfallData = ReadCsvData(filePath);
+            var footfallData = await ReadCsvData(filePath);
 
             var filteredData = footfallData
                 .Where(entry => entry.Timestamp >= startDate && entry.Timestamp <= endDate)
                 .ToList();
 
-            if (filteredData.Count == 0)
+            var aggregatedData = new List<FootfallRecord>();
+
+            if (timeframe == "hourly")
             {
-                return Enumerable.Empty<HourlyAggregation>();
+                aggregatedData = AggregateHourly(filteredData);
+            }
+            else if (timeframe == "daily")
+            {
+                aggregatedData = AggregateDaily(filteredData);
+            }
+            else if (timeframe == "weekly")
+            {
+                aggregatedData = AggregateWeekly(filteredData);
             }
 
-            var hourlyAggregations = new List<HourlyAggregation>(); //TODO map
-
-            return hourlyAggregations;
+            return aggregatedData;
         }
 
-        private IEnumerable<FootfallRecord> ReadCsvData(string filePath)
+        private List<FootfallRecord> AggregateWeekly(List<FootfallRecord> filteredData)
+        {
+            throw new NotImplementedException();
+        }
+
+        private List<FootfallRecord> AggregateDaily(List<FootfallRecord> filteredData)
+        {
+            throw new NotImplementedException();
+        }
+
+        private List<FootfallRecord> AggregateHourly(List<FootfallRecord> filteredData)
+        {
+            throw new NotImplementedException();
+        }
+
+        private async Task<IEnumerable<FootfallRecord>> ReadCsvData(string filePath)
+
         {
             var csvData = new List<FootfallRecord>();
             return csvData;
