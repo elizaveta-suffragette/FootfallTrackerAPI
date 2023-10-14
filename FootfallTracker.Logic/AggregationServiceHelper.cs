@@ -12,14 +12,16 @@ namespace FootfallTracker.Logic
             var hourlyAggregations = data
                 .GroupBy(entry => new
                 {
-                    entry.TimeStamp.Date,
-                    entry.TimeStamp.Hour
+                    Date = entry.TimeStamp.Date,
+                    Hour = entry.TimeStamp.Hour,
                 })
                 .Select(group => new AggregatedData
                 {
                     Date = group.Key.Date,
                     Hour = group.Key.Hour,
-                    TotalCount = group.Sum(entry => entry.Count)
+                    TotalCount = group.Sum(entry => entry.Count),
+                    Day = group.Key.Date.Day,
+                    Week = CalculateWeekNumber(group.Key.Date),
                 })
                 .ToList();
 
@@ -46,28 +48,22 @@ namespace FootfallTracker.Logic
             return dailyAggregations;
         }
 
-        public static int CalculateWeekNumber(DateTime date)
-        {
-            DayOfWeek dayOfWeek = date.DayOfWeek;
-            if (dayOfWeek == DayOfWeek.Sunday)
-            {
-                return 1;
-            }
-            else
-            {
-                int dayOffset = (int)dayOfWeek;
-                return (date.Day + 6 - dayOffset) / 7;
-            }
-        }
-
         public static IEnumerable<AggregatedData> AggregateWeekly(List<FootfallRecord> data)
         {
             var weeklyAggregations = data
-                .GroupBy(entry => GetStartOfWeek(entry.TimeStamp))
+                .GroupBy(entry => new
+                {
+                    Year = entry.TimeStamp.Year,
+                    Week = CalculateWeekNumber(entry.TimeStamp),
+                    Date = GetStartOfWeek(entry.TimeStamp)
+                })
                 .Select(group => new AggregatedData
                 {
-                    Date = group.Key,
-                    TotalCount = group.Sum(entry => entry.Count)
+                    Date = group.Key.Date,
+                    Week = group.Key.Week,
+                    TotalCount = group.Sum(entry => entry.Count),
+                    Day = group.Min(entry => entry.TimeStamp.Day),
+                    Hour = group.Min(entry => entry.TimeStamp.Hour)
                 })
                 .ToList();
 
@@ -79,6 +75,11 @@ namespace FootfallTracker.Logic
             var dayOfWeek = date.DayOfWeek;
             var daysToSubtract = (int)dayOfWeek;
             return date.Date.AddDays(-daysToSubtract);
+        }
+
+        public static int CalculateWeekNumber(DateTime date)
+        {
+            return CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(date, CalendarWeekRule.FirstDay, DayOfWeek.Sunday);
         }
 
         public static async Task<IEnumerable<FootfallRecord>> ReadCsvData(string filePath)
