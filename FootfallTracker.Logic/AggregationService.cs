@@ -4,7 +4,7 @@ namespace FootfallTracker.Logic
 {
     public class AggregationService : IAggregationService
     {
-        public async Task<IEnumerable<FootfallRecord>> GetAggregatedData(string timeframe, string filePath, DateTime startDate, DateTime endDate)
+        public async Task<IEnumerable<AggregatedData>> GetAggregatedData(string timeframe, string filePath, DateTime startDate, DateTime endDate)
         {
             var footfallData = await ReadCsvData(filePath);
 
@@ -12,7 +12,7 @@ namespace FootfallTracker.Logic
                 .Where(entry => entry.Timestamp >= startDate && entry.Timestamp <= endDate)
                 .ToList();
 
-            var aggregatedData = new List<FootfallRecord>();
+            IEnumerable<AggregatedData> aggregatedData = new List<AggregatedData>();
 
             if (timeframe == "hourly")
             {
@@ -30,23 +30,61 @@ namespace FootfallTracker.Logic
             return aggregatedData;
         }
 
-        private List<FootfallRecord> AggregateWeekly(List<FootfallRecord> filteredData)
+        private IEnumerable<AggregatedData> AggregateHourly(List<FootfallRecord> data)
         {
-            throw new NotImplementedException();
+            var hourlyAggregations = data
+                .GroupBy(entry => new
+                {
+                    entry.Timestamp.Date,
+                    entry.Timestamp.Hour
+                })
+                .Select(group => new AggregatedData
+                {
+                    Date = group.Key.Date,
+                    Hour = group.Key.Hour,
+                    TotalCount = group.Sum(entry => entry.Count)
+                })
+                .ToList();
+
+            return hourlyAggregations;
         }
 
-        private List<FootfallRecord> AggregateDaily(List<FootfallRecord> filteredData)
+        private IEnumerable<AggregatedData> AggregateDaily(List<FootfallRecord> data)
         {
-            throw new NotImplementedException();
+            var dailyAggregations = data
+                .GroupBy(entry => entry.Timestamp.Date)
+                .Select(group => new AggregatedData
+                {
+                    Date = group.Key,
+                    TotalCount = group.Sum(entry => entry.Count)
+                })
+                .ToList();
+
+            return dailyAggregations;
         }
 
-        private List<FootfallRecord> AggregateHourly(List<FootfallRecord> filteredData)
+        private IEnumerable<AggregatedData> AggregateWeekly(List<FootfallRecord> data)
         {
-            throw new NotImplementedException();
+            var weeklyAggregations = data
+                .GroupBy(entry => GetStartOfWeek(entry.Timestamp))
+                .Select(group => new AggregatedData
+                {
+                    Date = group.Key,
+                    TotalCount = group.Sum(entry => entry.Count)
+                })
+                .ToList();
+
+            return weeklyAggregations;
+        }
+
+        private DateTime GetStartOfWeek(DateTime date)
+        {
+            var dayOfWeek = date.DayOfWeek;
+            var daysToSubtract = (int)dayOfWeek;
+            return date.Date.AddDays(-daysToSubtract);
         }
 
         private async Task<IEnumerable<FootfallRecord>> ReadCsvData(string filePath)
-
         {
             var csvData = new List<FootfallRecord>();
             return csvData;

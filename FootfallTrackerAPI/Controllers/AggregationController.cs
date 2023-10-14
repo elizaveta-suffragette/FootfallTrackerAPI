@@ -22,10 +22,10 @@ namespace FootfallTrackerAPI.Controllers
         /// <param name="endDate">End date</param>
         /// <returns>Hourly aggregated data</returns>
         public async Task<IActionResult> GetAggregatedData(string timeframe, string filePath, DateTime startDate, DateTime endDate)
-            {
+        {
             var aggregatedData = await _aggregationService.GetAggregatedData(timeframe, filePath, startDate, endDate);
 
-            if (aggregatedData == null)
+            if (aggregatedData == null || !aggregatedData.Any())
             {
                 return NotFound("No data available for the specified date range.");
             }
