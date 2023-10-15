@@ -17,7 +17,7 @@ namespace FootfallTracker.Logic
                 })
                 .Select(group => new AggregatedData
                 {
-                    Date = group.Key.Date,
+                    Date = group.Min(entry => entry.TimeStamp),
                     Hour = group.Key.Hour,
                     TotalCount = group.Sum(entry => entry.Count),
                     Day = group.Key.Date.Day,
