@@ -2,7 +2,7 @@
 
 ## Task Description
 
-At PFM, we collect and process footfall data collected by various sensors. This data is stored in 15-minute time slots per sensor. We need an API that can provide this data in different aggregations: hourly, daily, and weekly. The API should return accurate data as the correctness of the data is crucial for our customers.
+At PFM, we collect and process footfall data collected by various sensors. This data is stored in 15-minute time slots per sensor. API that can provide this data in different aggregations: hourly, daily, and weekly. The API should return accurate data as the correctness of the data is crucial for our customers.
 
 ## How to Use the API
 
