@@ -10,7 +10,7 @@ At PFM, we collect and process footfall data collected by various sensors. This 
 
 You can access the API through the following endpoint:
 
-- **GET /api/aggregated-data**
+- **GET /api/aggregation**
 
 ### Parameters
 
@@ -24,5 +24,5 @@ The API expects the following parameters in the query string:
 ### Example Request
 
 ```http
-GET /api/aggregated-data?timeframe=daily&filePath=YourFilePath\footfall_data.csv&startDate=2023-01-01T00:00:00&endDate=2023-01-02T00:00:00
+GET /api/aggregation?timeframe=daily&filePath=YourFilePath\footfall_data.csv&startDate=2023-01-01T00:00:00&endDate=2023-01-02T00:00:00
 ```
